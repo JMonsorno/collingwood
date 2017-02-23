@@ -1,0 +1,185 @@
+.scrollingTables .commonScrollingTableSide, .scrollingTables .scrollingTableRightSide, .scrollingTables .scrollingTableLeftSide, .scrollingTables .scrollingTableFixedHeader {
+    width: 100%;
+    display: table-cell;
+}
+
+div.stickyHeaderContainer {
+    position: fixed;
+    position: -webkit-sticky;
+    position: -moz-sticky;
+    position: -ms-sticky;
+    position: -o-sticky;
+    position: sticky;
+    width: 100%;
+    left: auto;
+    right: auto;
+    padding: 0;
+    top: 0;
+    display: block;
+    z-index: 10;
+}
+
+div.scrollingTables {
+    position: relative;
+    width: 100%;
+    display: table;
+    table-layout: fixed;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    vertical-align: baseline;
+}
+
+div.scrollingTables.scrollingTableFixedHeader {
+    margin-bottom: 0;
+}
+
+div.scrollingTableLeftSide, div.scrollingTableRightSide {
+    overflow: hidden;
+}
+
+.scrollingTables .scrollingTableLeftSide {
+    z-index: 5;
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* pointer-events: none; */
+}
+
+.pannable {
+    /* -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none; */
+}
+
+.scrollingTables.scrollingTableFixedHeader .scrollingTableRightSide .scrollingTableOverFlow {
+    overflow-x: hidden;
+}
+
+.overflowSupported .scrollingTableRightSide .scrollingTableOverFlow {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.scrollingTableLeft, .scrollingTableRight {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: collapse;
+}
+
+table.collingwood {
+    border-spacing: 0;
+    border-collapse: collapse;
+    empty-cells: show;
+}
+
+.scrollingTables.scrollingTableFixedHeader thead {
+    display: inline-block;
+    overflow: hidden;
+}
+
+.scrollingTables.scrollingTableFixedHeader tbody.scrollIndicators td {
+    line-height: 0
+}
+
+.scrollingTables.scrollingTableFixedHeader tbody.scrollIndicators .scrollIndRgt, .scrollingTables.scrollingTableFixedHeader tbody.scrollIndicators .scrollIndLft {
+    bottom: auto;
+}
+
+.scrollingTables.scrollingTableFixedHeader .scrollIndRgt, .scrollingTables.scrollingTableFixedHeader .scrollIndLft {
+    background: 0;
+}
+
+.scrollIndicators .commonIndicator, .scrollIndicators .scrollIndRgt, .scrollIndicators .scrollIndLft {
+    height: auto;
+    bottom: 0;
+    top: 0;
+    width: 27px;
+    position: absolute;
+}
+
+.scrollIndicators .scrollIndLft>.scrollIndArr {
+    background: url(https://intranet.pilotpen.com/collingwood/images/svg/table_arrow_left.svg) 50% 50%;
+}
+
+.scrollIndicators .scrollIndLft>.scrollIndArr:hover {
+    background: #666 url(https://intranet.pilotpen.com/collingwood/images/svg/table_arrow_left_hover.svg) 50% 50%;
+}
+
+.scrollIndicators .scrollIndLft .shadow {
+    background-image: url(https://intranet.pilotpen.com/collingwood/images/scroll_shading_left.png);
+}
+
+.scrollIndicators .scrollIndArr {
+    min-width: 27px;
+    vertical-align: middle;
+    text-align: center;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 2
+}
+
+.scrollIndicators .commonShadow, .scrollIndicators .scrollIndRgt .shadow, .scrollIndicators .scrollIndLft .shadow {
+    background-position: right center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    position: absolute;
+    bottom: 0;
+    top: 0;
+    width: 27px;
+    z-index: -1;
+}
+
+.scrollIndicators .scrollIndRgt>.scrollIndArr {
+    background: url(https://intranet.pilotpen.com/collingwood/images/svg/table_arrow_right.svg) 50% 50%;
+}
+
+.scrollIndicators .scrollIndRgt>.scrollIndArr:hover {
+    background: #666 url(https://intranet.pilotpen.com/collingwood/images/svg/table_arrow_right_hover.svg) 50% 50%;
+}
+
+.scrollIndicators .scrollIndRgt .shadow {
+    background-image: url(https://intranet.pilotpen.com/collingwood/images/scroll_shading_right.png);
+}
+
+.scrollingTableLeft .scrollIndicators>tr>td {
+    visibility: visible;
+    padding: 0;
+    height: 0;
+    border-width: 0;
+}
+
+.scrollingTableLeft td, .scrollingTableLeft th, .scrollingTableLeftSide td, .scrollingTableLeftSide th {
+    visibility: hidden;
+}
+
+.scrollingTableLeftSide .fixedCol, .scrollingTableLeftSide .overlayScrollIndicator {
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.scrollingTableRightSide .fixedCol {
+    visibility: hidden;
+    /* pointer-events: none; */
+}
+
+.stickyHeaderContainer ~ .scrollingTables thead, .stickyHeaderContainer ~ .scrollingTables thead * {
+    visibility: collapse;
+    margin-bottom: 0;
+    margin-top: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-top: 0;
+    border-bottom: 0;
+    line-height: 0;
+    height: 2px!important;
+}
+
+.scrollIndicators .scrollIndRgt {
+    right: 0;
+}
+
