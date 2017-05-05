@@ -161,13 +161,15 @@ table.collingwood {
     visibility: visible;
     pointer-events: auto;
 }
-
+.fixedCol {
+    background: white;
+}
 .scrollingTableRightSide .fixedCol {
     visibility: hidden;
     /* pointer-events: none; */
 }
 
-.stickyHeaderContainer ~ .scrollingTables thead, .stickyHeaderContainer ~ .scrollingTables thead * {
+.stickyHeaderContainer ~ .scrollingTables thead:not(.ieShow), .stickyHeaderContainer ~ .scrollingTables thead:not(.ieShow) * {
     visibility: collapse;
     margin-bottom: 0;
     margin-top: 0;
@@ -175,11 +177,18 @@ table.collingwood {
     padding-bottom: 0;
     border-top: 0;
     border-bottom: 0;
-    line-height: 0;
     height: 2px!important;
+    line-height: 0;
 }
 
 .scrollIndicators .scrollIndRgt {
     right: 0;
 }
 
+.collingwood #tableContainers>#original {
+    visibility: hidden;
+}
+
+.collingwood>.stickyHeaderContainer>.scrollingTables>.scrollingTableLeftSide {
+    visibility: hidden;
+}
