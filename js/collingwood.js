@@ -46,69 +46,100 @@ function addCss(fileName) {
 }
 
 if (!Object.prototype.appendDiv) {
-    Object.prototype.appendDiv = function appendDiv(id, className, style, mouseDownEvent, mouseUpEvent) {
-        return this.appendElement('div', id, className, style, mouseDownEvent, mouseUpEvent);
-    };
+    Object.defineProperty(Object.prototype, "appendDiv", { 
+        value: function(id, className, style, mouseDownEvent, mouseUpEvent) {
+            return this.appendElement('div', id, className, style, mouseDownEvent, mouseUpEvent);
+        },
+        enumerable : false
+    });
 }
 
 if (!Object.prototype.appendElement) {
-    Object.prototype.appendElement = function appendElement(tag, id, className, style, mouseDownEvent, mouseUpEvent) {
-        var ele = createElement(tag, id, className, style, mouseDownEvent, mouseUpEvent);
-        if (this.appendChild)
-            this.appendChild(ele);
-        return ele;
-    };
+    Object.defineProperty(Object.prototype, "appendElement", { 
+        value: function(tag, id, className, style, mouseDownEvent, mouseUpEvent) {
+            var ele = createElement(tag, id, className, style, mouseDownEvent, mouseUpEvent);
+            if (this.appendChild)
+                this.appendChild(ele);
+            return ele;
+        },
+        enumerable : false
+    });
 }
 
 if (!Object.prototype.insertElement) {
-    Object.prototype.insertElement = function insertElement(tag, order, id, className, style, mouseDownEvent, mouseUpEvent) {
-        var ele = createElement(tag, id, className, style, mouseDownEvent, mouseUpEvent);
-        if (typeof(order) !== "number" || order < 1)
-            order = 1;
-        var refEle = this.querySelector('*:nth-child(' + order + ')');
-        this.insertBefore(ele, refEle);
-        return ele;
-    };
+    Object.defineProperty(Object.prototype, "insertElement", { 
+        value: function(tag, order, id, className, style, mouseDownEvent, mouseUpEvent) {
+            var ele = createElement(tag, id, className, style, mouseDownEvent, mouseUpEvent);
+            if (typeof(order) !== "number" || order < 1)
+                order = 1;
+            var refEle = this.querySelector('*:nth-child(' + order + ')');
+            this.insertBefore(ele, refEle);
+            return ele;
+        },
+        enumerable : false
+    });
 }
 
 if (!Object.prototype.cloneAppend) {
-    Object.prototype.cloneAppend = function cloneAppend(id) {
-        var temp = createElement(this.parentElement.nodeName);
-        temp.innerHTML = this.outerHTML.replace(/id="([\w-]+)"/g, 'id="$1' + id + '"');
-        return temp.firstChild;
-    };
+    Object.defineProperty(Object.prototype, "cloneAppend", { 
+        value: function(id) {
+            var temp = createElement(this.parentElement.nodeName);
+            temp.innerHTML = this.outerHTML.replace(/id="([\w-]+)"/g, 'id="$1' + id + '"');
+            return temp.firstChild;
+        },
+        enumerable : false
+    });
 }
 
 if (!Object.prototype.appendCloneAppend) {
-    Object.prototype.appendCloneAppend = function appendCloneAppend(ele, id) {
-        var temp = ele.cloneAppend(id);
-        this.appendChild(temp);
-        return temp;
-    };
+    Object.defineProperty(Object.prototype, "appendCloneAppend", { 
+        value: function(ele, id) {
+            var temp = ele.cloneAppend(id);
+            this.appendChild(temp);
+            return temp;
+        },
+        enumerable : false
+    });
 }
 
 if (!Object.prototype.appendShallowCloneAppend) {
-    Object.prototype.appendShallowCloneAppend = function appendShallowCloneAppend(ele, id, className) {
-        var temp = ele.cloneNode();
-        if (typeof(id) !== 'undefined' && id != null)
-            temp.id += id;
-        if (typeof(className) !== 'undefined' && className != null)
-            temp.className += ' ' + className;
-        this.appendChild(temp);
+    Object.defineProperty(Object.prototype, "appendShallowCloneAppend", { 
+        value: function(ele, id, className) {
+            var temp = ele.cloneNode();
+            if (typeof(id) !== 'undefined' && id != null)
+                temp.id += id;
+            if (typeof(className) !== 'undefined' && className != null)
+                temp.className += ' ' + className;
+            this.appendChild(temp);
         return temp;
-    };
+        },
+        enumerable : false
+    });
 }
 
+var HtmlElementToString = (function(ele) {
+   var results = new RegExp('^(<((?!>).)*>).*(<((?!>).)*>)$', '').exec(ele.outerHTML.replace(/\n/g, ''));
+   return results[1] + results[3];
+});
 
-var collingwood = (function(selector) {
+
+var collingwood = (function(selector, debug) {
     if (typeof(selector) === 'undefined')
         selector = 'table.collingwood';
+    if (typeof(debug) === 'undefined')
+        debug = false;
+    if (debug) { console.log('Running Collingwood on ' + selector); }
     var tables = document.querySelectorAll(selector);
+    if (debug) { console.log('  |- found ' + tables.length); }
     for(i = 0; i < tables.length; ++i) {
         table = tables[i];
+        if (debug) { console.log('  |- Running instance index ' + i); }
+        if (debug) { console.log('    |- ' + HtmlElementToString(table)); }
         var tableParent = table.parentElement;
-        if (tableParent.id = 'original' && tableParent.classList.contains('scrollingTableLeftSide'))
+        if (tableParent.id == 'original' || tableParent.classList.contains('scrollingTableLeftSide') || tableParent.classList.contains('scrollingTableRight') || tableParent.classList.contains('scrollingTableOverflow') || table.classList.contains('scrollingTableLeftSide') || table.classList.contains('scrollingTableRight') ) {
+            if (debug) { console.log('    |- Aborting, this table already has collingwood implemented.'); }
             continue;
+        }
         //Force having a thead
         var headerHeight = 1; //Also calculate header height since we're already looping through them
         var tableChildren = table.children;
@@ -156,6 +187,9 @@ var collingwood = (function(selector) {
                                         newCols[k].style.minWidth = newCols[k].style.width;
                                         if (newCols[k].clientWidth != desiredWidth) { //compsenate for padding, margin, border, etc.
                                             var offset = (desiredWidth - newCols[k].clientWidth);
+                                            if (detectIE() && tableHeaderLeft.border && tableHeaderLeft.border > 0) {
+                                                offset += parseInt(tableHeaderLeft.border, 10);
+                                            }
                                             var newWidth = offset + desiredWidth;
                                             newCols[k].offset = offset;
                                             newCols[k].style.width = newWidth + 'px';
@@ -167,7 +201,7 @@ var collingwood = (function(selector) {
                             tBodyLeft.className = 'scrollIndicators';
                                 trBodyLeft = tBodyLeft.appendElement('tr', null, 'scrollIndicatorLeftShown scrollIndicatorRightShown');
                                     scrollIndicatorSpacer = trBodyLeft.appendElement('td');
-                                    scrollIndicatorSpacer.colSpan = colCount;
+                                    scrollIndicatorSpacer.setAttribute("colSpan", colCount);
                                     scrollIndicatorLeft = trBodyLeft.appendElement('td').appendDiv(null, 'scrollIndLft', 'left: ' + colWidth);
                                         scrollIndicatorLeft.appendDiv(null, 'scrollIndArr', 'height: ' + headerHeight, function(){scrollPannable(this, -1, true)}, function(){scrollPannable(this, 0, false)});
                                         scrollIndicatorLeft.appendDiv(null, 'shadow');
@@ -190,6 +224,9 @@ var collingwood = (function(selector) {
                                         newCols[k].style.minWidth = newCols[k].style.width;
                                         if (newCols[k].clientWidth != desiredWidth) { //compsenate for padding, margin, border, etc.
                                             var offset = (desiredWidth - newCols[k].clientWidth);
+                                            if (detectIE() && tableHeaderRight.border && tableHeaderRight.border > 0) {
+                                                offset += parseInt(tableHeaderRight.border, 10);
+                                            }
                                             var newWidth = offset + desiredWidth;
                                             newCols[k].offset = offset;
                                             newCols[k].style.width = newWidth + 'px';
@@ -203,12 +240,35 @@ var collingwood = (function(selector) {
                 var originalClone = tableContainers.appendDiv(null, 'scrollingTableRightSide pannable');
                     var scrollingTableOverflow2 = originalClone.appendDiv(null, 'scrollingTableOverflow');
                         var fullTableClone = scrollingTableOverflow2.appendCloneAppend(table, '-fullTableClone');
+        //Show non-sticky header if IE
+        if (detectIE()) {
+            var nonStickyHeader = originalClone.querySelector('thead');
+            nonStickyHeader.classList.add('ieShow');
+            var parentSearch = tableContainer;
+            do {
+                styles = window.getComputedStyle(parentSearch, null);
+                if (styles.position.toLowerCase() == 'fixed' && styles.overflow.toLowerCase() == 'auto') {
+                    var scrollableParent = parentSearch;
+                    parentSearch = null; //to exit loop safely
+                    tableContainer.scrollableParent = scrollableParent;
+                    scrollableParent.onscroll = function() {
+                        IEscrolling();
+                    };
+                } else {
+                    parentSearch = parentSearch.parentElement;
+                }                
+            } while(parentSearch != null);
+        }
     }
     resizeFixedHeaders();
 });
 
 window.onresize = function (event) {
     resizeFixedHeaders();
+};
+
+window.onscroll = function() {
+    IEscrolling();
 };
 
 var scrollPannable = (function () {
@@ -237,14 +297,34 @@ function resizeFixedHeaders() {
     var containers = document.querySelectorAll('div.tableContainer.collingwood');
     for (i = 0; i < containers.length; ++i) {
         var container = containers[i];
-        var stickyLeft = container.querySelectorAll('.stickyHeaderContainer>.scrollingTables>.scrollingTableLeftSide>table .fixed-head');
-        var stickyRight = container.querySelectorAll('.stickyHeaderContainer>.scrollingTables>.scrollingTableRightSide table .fixed-head');
-        var original = container.querySelectorAll('#original>table .fixed-head');
+        var stickyLeftTable = container.querySelector('.stickyHeaderContainer>.scrollingTables>.scrollingTableLeftSide>table');
+        var stickyLeft = stickyLeftTable.querySelectorAll('.fixed-head');
+        var stickyRightTable = container.querySelector('.stickyHeaderContainer>.scrollingTables>.scrollingTableRightSide table');
+        var stickyRight = stickyRightTable.querySelectorAll('.fixed-head');
+        if (stickyLeft.length != stickyRight.length) {
+            continue;
+        }
+        var originalTable = container.querySelector('#original>table');
+        var originalWidth = window.getComputedStyle(originalTable, null).width;
+        stickyLeftTable.style.width = originalWidth;
+        stickyRightTable.style.width = originalWidth;
+        var original = originalTable.querySelectorAll('.fixed-head');
         for (j = 0; j < stickyLeft.length; ++j) {
             var stickyLeftCols = stickyLeft[j].querySelectorAll('th, td');
             var stickyRightCols = stickyRight[j].querySelectorAll('th, td');
             var originalCols = original[j].querySelectorAll('th, td');
             for (k = 0; k < stickyLeftCols.length; ++k) {
+                if (false && detectIE()) {
+                    var originalStyle = window.getComputedStyle(originalCols[k], null);
+                    for(var propertyName in originalStyle) {
+                        //if (propertyName.startsWith('border')) {
+                            stickyLeftCols[k].style[propertyName] = originalStyle[propertyName];
+                            stickyRightCols[k].style[propertyName] = originalStyle[propertyName];
+                        //}
+                    }
+                
+                    window.getComputedStyle(document.querySelector("#original table"), null)
+                }
                 var width = originalCols[k].clientWidth + stickyLeftCols[k].offset;
                 stickyLeftCols[k].style.width = width + 'px';
                 stickyLeftCols[k].style.minWidth = stickyLeftCols[k].style.width;
@@ -254,7 +334,7 @@ function resizeFixedHeaders() {
         }
         
         //Left arrow alignment
-        var cols = container.querySelectorAll('#original>table tr:first-child>td.fixedCol');
+        var cols = originalTable.querySelectorAll('tr:first-child>td.fixedCol');
         var colWidth = 0;
         for(j = 0; j < cols.length; ++j) {
             var col = cols[j];
@@ -266,7 +346,30 @@ function resizeFixedHeaders() {
         
         checkScrollArrows(container);
     }
+    IEscrolling();
 };
+
+function IEscrolling() {
+    if (!detectIE()) {
+        return;
+    }
+    //IE doesn't support sticky so the sticky header will have to use fixed and be turn on and off based on scrolling
+    //Likewise the non-sticky header has to be controlled with the opposite conditions (Set in Collingwood function)
+    var containers = document.querySelectorAll('div.tableContainer.collingwood');
+    for (i = 0; i < containers.length; ++i) {
+        var container = containers[i];
+        var stickyHeaderContainer = container.querySelector('.stickyHeaderContainer');
+        var showSticky = container.getBoundingClientRect().top <= 0;
+        if (container.scrollableParent) {
+            showSticky = container.getBoundingClientRect().top <= container.scrollableParent.getBoundingClientRect().top;
+            stickyHeaderContainer.style.top = container.scrollableParent.getBoundingClientRect().top + 'px';
+        }
+        var tableContainers = container.querySelector('#tableContainers.scrollingTables');
+        //Show/Hide sticky header
+        stickyHeaderContainer.style.display = showSticky ? 'block' : 'none';
+        stickyHeaderContainer.style.width = tableContainers.getBoundingClientRect().width + 'px';        
+    }
+}
 
 function checkScrollArrows(container) {
     var scrollingTableOverflow = container.querySelector('div.scrollingTableOverflow').parentElement;
@@ -291,63 +394,106 @@ function checkScrollArrows(container) {
 
 
 if (!Object.prototype.forEach) {
+    Object.defineProperty(Object.prototype, "forEach", { 
+        value: function(callback) {
 
-  Object.prototype.forEach = function(callback/*, thisArg*/) {
+            var T, k;
 
-    var T, k;
+            if (this == null) {
+              throw new TypeError('this is null or not defined');
+            }
 
-    if (this == null) {
-      throw new TypeError('this is null or not defined');
-    }
+            // 1. Let O be the result of calling toObject() passing the
+            // |this| value as the argument.
+            var O = Object(this);
 
-    // 1. Let O be the result of calling toObject() passing the
-    // |this| value as the argument.
-    var O = Object(this);
+            // 2. Let lenValue be the result of calling the Get() internal
+            // method of O with the argument "length".
+            // 3. Let len be toUint32(lenValue).
+            var len = O.length >>> 0;
 
-    // 2. Let lenValue be the result of calling the Get() internal
-    // method of O with the argument "length".
-    // 3. Let len be toUint32(lenValue).
-    var len = O.length >>> 0;
+            // 4. If isCallable(callback) is false, throw a TypeError exception. 
+            // See: http://es5.github.com/#x9.11
+            if (typeof callback !== 'function') {
+              throw new TypeError(callback + ' is not a function');
+            }
 
-    // 4. If isCallable(callback) is false, throw a TypeError exception. 
-    // See: http://es5.github.com/#x9.11
-    if (typeof callback !== 'function') {
-      throw new TypeError(callback + ' is not a function');
-    }
+            // 5. If thisArg was supplied, let T be thisArg; else let
+            // T be undefined.
+            if (arguments.length > 1) {
+              T = arguments[1];
+            }
 
-    // 5. If thisArg was supplied, let T be thisArg; else let
-    // T be undefined.
-    if (arguments.length > 1) {
-      T = arguments[1];
-    }
+            // 6. Let k be 0
+            k = 0;
 
-    // 6. Let k be 0
-    k = 0;
+            // 7. Repeat, while k < len
+            while (k < len) {
 
-    // 7. Repeat, while k < len
-    while (k < len) {
+              var kValue;
 
-      var kValue;
+              // a. Let Pk be ToString(k).
+              //    This is implicit for LHS operands of the in operator
+              // b. Let kPresent be the result of calling the HasProperty
+              //    internal method of O with argument Pk.
+              //    This step can be combined with c
+              // c. If kPresent is true, then
+              if (k in O) {
 
-      // a. Let Pk be ToString(k).
-      //    This is implicit for LHS operands of the in operator
-      // b. Let kPresent be the result of calling the HasProperty
-      //    internal method of O with argument Pk.
-      //    This step can be combined with c
-      // c. If kPresent is true, then
-      if (k in O) {
+                // i. Let kValue be the result of calling the Get internal
+                // method of O with argument Pk.
+                kValue = O[k];
 
-        // i. Let kValue be the result of calling the Get internal
-        // method of O with argument Pk.
-        kValue = O[k];
+                // ii. Call the Call internal method of callback with T as
+                // the this value and argument list containing kValue, k, and O.
+                callback.call(T, kValue, k, O);
+              }
+              // d. Increase k by 1.
+              k++;
+            }
+            // 8. return undefined
+            
+        },
+        enumerable : false
+    });
+}
 
-        // ii. Call the Call internal method of callback with T as
-        // the this value and argument list containing kValue, k, and O.
-        callback.call(T, kValue, k, O);
-      }
-      // d. Increase k by 1.
-      k++;
-    }
-    // 8. return undefined
-  };
+function detectIE() {
+  var ua = window.navigator.userAgent;
+
+  // Test values; Uncomment to check result …
+
+  // IE 10
+  // ua = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)';
+  
+  // IE 11
+  // ua = 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko';
+  
+  // Edge 12 (Spartan)
+  // ua = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36 Edge/12.0';
+  
+  // Edge 13
+  // ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Safari/537.36 Edge/13.10586';
+
+  var msie = ua.indexOf('MSIE ');
+  if (msie > 0) {
+    // IE 10 or older => return version number
+    return parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
+  }
+
+  var trident = ua.indexOf('Trident/');
+  if (trident > 0) {
+    // IE 11 => return version number
+    var rv = ua.indexOf('rv:');
+    return parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
+  }
+
+  var edge = ua.indexOf('Edge/');
+  if (edge > 0) {
+    // Edge (IE 12+) => return version number
+    return parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
+  }
+
+  // other browser
+  return false;
 }
