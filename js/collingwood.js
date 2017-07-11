@@ -242,8 +242,8 @@ var collingwood = (function(selector, debug) {
                         var fullTableClone = scrollingTableOverflow2.appendCloneAppend(table, '-fullTableClone');
         //Show non-sticky header if IE
         if (detectIE()) {
-            var nonStickyHeader = originalClone.querySelector('thead');
-            nonStickyHeader.classList.add('ieShow');
+            originalClone.querySelector('thead').classList.add('ieShow');;
+            original.querySelector('thead').classList.add('ieShow');
             var parentSearch = tableContainer;
             do {
                 styles = window.getComputedStyle(parentSearch, null);
