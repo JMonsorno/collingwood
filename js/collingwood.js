@@ -518,3 +518,14 @@ function detectIE() {
   // other browser
   return false;
 }
+
+function addCssRule(rule, index) {
+  var styleEl = document.querySelector('style#collingwoodAdder')
+  if (typeof(styleEl) === 'undefined' || styleEl == null) {
+    styleEl = document.createElement('style');
+    styleEl.id = 'collingwoodAdder';
+    document.head.appendChild(styleEl);
+  }
+  var styleSheet = styleEl.sheet;
+  styleSheet.insertRule(rule, index);
+}
