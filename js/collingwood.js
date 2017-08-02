@@ -54,12 +54,33 @@ if (!Object.prototype.appendDiv) {
     });
 }
 
+if (!Object.prototype.prependDiv) {
+    Object.defineProperty(Object.prototype, "prependDiv", { 
+        value: function(refObj, id, className, style, mouseDownEvent, mouseUpEvent) {
+            return this.prependElement(refObj, 'div', id, className, style, mouseDownEvent, mouseUpEvent);
+        },
+        enumerable : false
+    });
+}
+
 if (!Object.prototype.appendElement) {
     Object.defineProperty(Object.prototype, "appendElement", { 
         value: function(tag, id, className, style, mouseDownEvent, mouseUpEvent) {
             var ele = createElement(tag, id, className, style, mouseDownEvent, mouseUpEvent);
             if (this.appendChild)
                 this.appendChild(ele);
+            return ele;
+        },
+        enumerable : false
+    });
+}
+
+if (!Object.prototype.prependElement) {
+    Object.defineProperty(Object.prototype, "prependElement", { 
+        value: function(refObj, tag, id, className, style, mouseDownEvent, mouseUpEvent) {
+            var ele = createElement(tag, id, className, style, mouseDownEvent, mouseUpEvent);
+            if (this.insertBefore)
+                this.insertBefore(ele, refObj);
             return ele;
         },
         enumerable : false
@@ -168,7 +189,7 @@ var collingwood = (function(selector, debug) {
         var colCount = cols.length;
         colWidth = colWidth + 'px';
         
-        var tableContainer = tableParent.appendDiv(null, 'tableContainer collingwood');
+        var tableContainer = tableParent.prependDiv(table, null, 'tableContainer collingwood');
             var stickyHeaderContainer = tableContainer.appendDiv(null, 'stickyHeaderContainer');
                 var scrollingTables = stickyHeaderContainer.appendDiv(null, 'scrollingTables scrollingTableFixedHeader');
                     var scrollingTableLeftSide = scrollingTables.appendDiv(null, 'scrollingTableLeftSide');
